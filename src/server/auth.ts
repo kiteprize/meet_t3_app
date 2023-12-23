@@ -5,6 +5,7 @@ import {
   type NextAuthOptions,
 } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
+import SlackProvider from "next-auth/providers/slack";
 
 import { env } from "~/env";
 import { db } from "~/server/db";
@@ -54,6 +55,10 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
+    }),
+    SlackProvider({
+      clientId: env.SLACK_CLIENT_ID,
+      clientSecret: env.SLACK_CLIENT_SECRET,
     }),
     /**
      * ...add more providers here.

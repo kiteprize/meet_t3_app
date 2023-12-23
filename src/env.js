@@ -3,17 +3,11 @@ import { z } from "zod";
 
 export const env = createEnv({
   /**
-   * Specify your server-side environment variables schema here. This way you can ensure the app
-   * isn't built with invalid env vars.
+   * @description 서버측에서만 사용하는 env
+   * 공개되면 안되는 env를 여기에 추가함
    */
   server: {
-    DATABASE_URL: z
-      .string()
-      .url()
-      .refine(
-        (str) => !str.includes("YOUR_MYSQL_URL_HERE"),
-        "You forgot to change the default URL",
-      ),
+    DATABASE_URL: z.string().url(),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -28,23 +22,24 @@ export const env = createEnv({
       // VERCEL_URL doesn't include `https` so it cant be validated as a URL
       process.env.VERCEL ? z.string() : z.string().url(),
     ),
-    // Add ` on ID and SECRET if you want to make sure they're not empty
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
+    SLACK_CLIENT_ID: z.string(),
+    SLACK_CLIENT_SECRET: z.string(),
   },
 
   /**
-   * Specify your client-side environment variables schema here. This way you can ensure the app
-   * isn't built with invalid env vars. To expose them to the client, prefix them with
-   * `NEXT_PUBLIC_`.
+   * @description 클라이언트측에서만 사용하는 env
+   * 성능 최적화를 위해서 클라이언트측에서만 사용하는 env를 여기에 추가함
+   * 현재는 사용할 게 없어서 전부 주석처리함
    */
-  client: {
-    // NEXT_PUBLIC_CLIENTVAR: z.string(),
-  },
+  // client: {
+  // NEXT_PUBLIC_CLIENTVAR: z.string(),
+  // },
 
   /**
-   * You can't destruct `process.env` as a regular object in the Next.js edge runtimes (e.g.
-   * middlewares) or client-side so we need to destruct manually.
+   * @description 런타임 환경변수
+   * 서버측, 클라이언트측에 환경변수 설정하려면 선행 조건으로 여기에 무조건 정의해야함
    */
   runtimeEnv: {
     DATABASE_URL: process.env.DATABASE_URL,
@@ -53,15 +48,12 @@ export const env = createEnv({
     NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+    SLACK_CLIENT_ID: process.env.SLACK_CLIENT_ID,
+    SLACK_CLIENT_SECRET: process.env.SLACK_CLIENT_SECRET,
   },
   /**
-   * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
-   * useful for Docker builds.
-   */
-  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
-  /**
-   * Makes it so that empty strings are treated as undefined.
-   * `SOME_VAR: z.string()` and `SOME_VAR=''` will throw an error.
+   * @description 빈 string의 env를 undefined로 변환함
+   * 빈 env를 사용할 경우 .string() 조건에서 error를 발생시키기 위한 용도
    */
   emptyStringAsUndefined: true,
 });
